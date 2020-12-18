@@ -1,0 +1,5 @@
+a
+asd
+RUN_ERROR: Failed to run command
+sdfg
+b
