@@ -449,7 +449,8 @@ void CloseProcPipes(struct Input* inp, int i, int* pipe_channel, int k) {
 void Execute(struct Input* inp, int i, int j) {
 /* Execvp with errors handler */
     execvp(inp->data[i].data[j][0], inp->data[i].data[j]);
-    inp->run_error = "Failed to run command";
+    inp->run_error = (char*) malloc(256);
+    sprintf(inp->run_error, "Failed to run command: %s", inp->data[i].data[j][0]);
     inp->end = true;
 }
 
@@ -563,6 +564,7 @@ bool RunPipe(struct Input* inp, int i) {
         return false;
     }
     // pipe execution
+    int saved_stdout = dup(1);
     for(int j = 1; j <= inp->data[i].size; j++) {
         pipe_child = fork();
         if(pipe_child == -1) {
@@ -575,6 +577,7 @@ bool RunPipe(struct Input* inp, int i) {
             }
             ClosePipes(pipe_channel, inp->data[i].size);
             Execute(inp, i, j - 1);
+            DupCh(inp, saved_stdout, 1);
             return false;
         } else { // parent proccess: add pipe_childPID to pipe_childs
             pipe_childs[j - 1] = pipe_child;
@@ -658,8 +661,10 @@ void PrintErrors(struct Input* inp) {
     if(inp->data->size != 0) {
         if(inp->inp_error != NULL)
             printf("INPUT_ERROR: %s\n", inp->inp_error);
-        if(inp->run_error != NULL)
+        if(inp->run_error != NULL) {
             printf("RUN_ERROR: %s\n", inp->run_error);
+            free(inp->run_error);
+        }
     }
 }
 
