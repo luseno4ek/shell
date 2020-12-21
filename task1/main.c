@@ -623,6 +623,7 @@ void RunInput(struct Input* inp) {
             }
         }
         if(child == 0) {
+            free(childs);
             inp->end = true;
             // change STDOUT
             if(inp->data[i].out_file != NULL) {
